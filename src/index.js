@@ -68,14 +68,14 @@ let parse = (src, anchors) => {
 			} else ps.push(a.p);
 		}
 		(ps.length && s[i++] === ']') || bad();
-		return { t: 'c', p: (c, spend) => {
+		return [1, (c, spend) => {
 			let yes = false;
 			for (const p of ps) {
 				spend();
 				if (p(c)) { yes = true; break }
 			}
 			return neg !== yes;
-		} };
+		}];
 	};
 	const number = () => {
 		let n = 0, d = 0;
@@ -98,11 +98,11 @@ let parse = (src, anchors) => {
 			return n;
 		}
 		if (c === '[') return cls();
-		if (c === '\\') { const e = esc(); return { t: 'c', p: e.p } }
-		if (c === '.') return { t: 'c', p: x => x !== '\n' && x !== '\r' };
-		if (anchors && (c === '^' || c === '$')) return { t: 'z', a: c === '$' };
+		if (c === '\\') { const e = esc(); return [1, e.p] }
+		if (c === '.') return [1, x => x !== '\n' && x !== '\r'];
+		if (anchors && (c === '^' || c === '$')) return [2, c === '$'];
 		(c != null && !'()[]|*+?{}'.includes(c)) || bad();
-		return { t: 'c', p: x => x === c };
+		return [1, x => x === c];
 	};
 	const piece = () => {
 		const a = atom(), c = s[i];
@@ -121,17 +121,17 @@ let parse = (src, anchors) => {
 			s[i++] === '}' || bad();
 			(hi < 0 || lo <= hi) || bad();
 		} else return a;
-		return { t: 'q', a, lo, hi };
+		return [5, a, lo, hi];
 	};
 	const branch = () => {
 		const v = [];
 		while (i < s.length && s[i] !== '|' && s[i] !== ')') v.push(piece());
-		return v.length ? { t: 'n', v } : { t: 'e' };
+		return v.length ? [3, v] : [0];
 	};
 	alt = () => {
 		const v = [branch()];
 		while (s[i] === '|') { i++; v.push(branch()) }
-		return v.length > 1 ? { t: 'a', v } : v[0];
+		return v.length > 1 ? [4, v] : v[0];
 	};
 	const out = alt();
 	i === s.length || bad();
@@ -148,27 +148,27 @@ let build = (pattern, anchors) => {
 	const empty = () => { const j = add(0); return { s: j, o: [[j, 1]] } };
 	const cat = (a, b) => (patch(a.o, b.s), { s: a.s, o: b.o });
 	const visit = n => {
-		if (n.t === 'e') return empty();
-		if (n.t === 'c') { const j = add(1, -1, -1, n.p); return { s: j, o: [[j, 1]] } }
-		if (n.t === 'z') { const j = add(2, -1, -1, n.a); return { s: j, o: [[j, 1]] } }
-		if (n.t === 'n') return n.v.reduce((a, x) => cat(a, visit(x)), empty());
-		if (n.t === 'a') {
-			let a = visit(n.v[0]);
-			for (let k = 1; k < n.v.length; k++) {
-				const b = visit(n.v[k]), j = add(0, a.s, b.s);
+		if (!n[0]) return empty();
+		if (n[0] === 1) { const j = add(1, -1, -1, n[1]); return { s: j, o: [[j, 1]] } }
+		if (n[0] === 2) { const j = add(2, -1, -1, n[1]); return { s: j, o: [[j, 1]] } }
+		if (n[0] === 3) return n[1].reduce((a, x) => cat(a, visit(x)), empty());
+		if (n[0] === 4) {
+			let a = visit(n[1][0]);
+			for (let k = 1; k < n[1].length; k++) {
+				const b = visit(n[1][k]), j = add(0, a.s, b.s);
 				a = { s: j, o: a.o.concat(b.o) };
 			}
 			return a;
 		}
 		let a = empty();
-		for (let k = 0; k < n.lo; k++) a = cat(a, visit(n.a));
-		if (n.hi < 0) {
-			const b = visit(n.a), j = add(0, b.s);
+		for (let k = 0; k < n[2]; k++) a = cat(a, visit(n[1]));
+		if (n[3] < 0) {
+			const b = visit(n[1]), j = add(0, b.s);
 			patch(a.o, j); patch(b.o, j);
 			return { s: a.s, o: [[j, 2]] };
 		}
-		for (let k = n.lo; k < n.hi; k++) {
-			const b = visit(n.a), j = add(0, b.s);
+		for (let k = n[2]; k < n[3]; k++) {
+			const b = visit(n[1]), j = add(0, b.s);
 			patch(a.o, j);
 			a = { s: a.s, o: b.o.concat([[j, 2]]) };
 		}
