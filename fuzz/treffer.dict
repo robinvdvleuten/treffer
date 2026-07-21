@@ -1,0 +1,40 @@
+# RFC 9485 grammar
+"|"
+"("
+")"
+"[a-z]"
+"[^a]"
+"[-a]"
+"\\["
+"\\]"
+"\\\\"
+"\\n"
+"\\r"
+"\\t"
+"\\p{L}"
+"\\p{Lu}"
+"\\P{N}"
+"*"
+"+"
+"?"
+"{0}"
+"{1,3}"
+"{2,}"
+
+# Compatibility anchors
+"^"
+"$"
+
+# Invalid JavaScript-only constructs
+"\\d"
+"\\w"
+"(?="
+"\\1"
+"+?"
+
+# Adversarial regular expressions
+"(a+)+$"
+"(a*)*"
+"(a|aa)+$"
+"a{1024}"
+"a{1000000}"
