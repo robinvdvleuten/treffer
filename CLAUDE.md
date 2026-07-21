@@ -4,7 +4,7 @@ Tiny, bounded RFC 9485 I-Regexp matcher for JavaScript. Zero runtime dependencie
 
 ## Commands
 
-- `npm test` runs tape under `node --disallow-code-generation-from-strings`.
+- `npm test` runs the Node test runner under `node --disallow-code-generation-from-strings`.
 - `npm run build` creates minified ESM and CJS bundles in `dist/`.
 - `npm run size` checks both bundles against the budgets in `package.json`.
 - `npm run fuzz` runs compile, match, and structured fuzz targets for 60 seconds each.
@@ -44,7 +44,7 @@ Syntax errors throw `SyntaxError`, invalid API values throw `TypeError`, and res
 ## Conventions
 
 - Tabs in JavaScript.
-- Tests use tape and live in `test/*.test.js`.
+- Tests use the Node test runner and live in `test/*.test.js`.
 - New syntax or safety behavior needs unit tests and structured fuzz coverage.
 - Keep the fuzz differential oracle restricted to short patterns and subjects so the native comparison engine cannot become a fuzzing bottleneck.
 - `index.d.ts` is hand-written. Type generation stays disabled in `tsdown.config.js`.

@@ -1,4 +1,5 @@
-import test from 'tape';
+import assert from 'node:assert/strict';
+import test from 'node:test';
 import { compile } from '../src/index.js';
 
 let native = (pattern, full) => {
@@ -13,7 +14,7 @@ let native = (pattern, full) => {
 	return new RegExp(full ? '^(?:' + out + ')$' : out, 'u');
 };
 
-test('safe RFC subset agrees with ECMAScript mapping', t => {
+test('safe RFC subset agrees with ECMAScript mapping', () => {
 	const patterns = [
 		'',
 		'a',
@@ -32,9 +33,8 @@ test('safe RFC subset agrees with ECMAScript mapping', t => {
 	for (const pattern of patterns) {
 		const re = compile(pattern);
 		for (const subject of subjects) {
-			t.equal(re.match(subject), native(pattern, true).test(subject), 'match ' + pattern + ' / ' + JSON.stringify(subject));
-			t.equal(re.search(subject), native(pattern, false).test(subject), 'search ' + pattern + ' / ' + JSON.stringify(subject));
+			assert.strictEqual(re.match(subject), native(pattern, true).test(subject), 'match ' + pattern + ' / ' + JSON.stringify(subject));
+			assert.strictEqual(re.search(subject), native(pattern, false).test(subject), 'search ' + pattern + ' / ' + JSON.stringify(subject));
 		}
 	}
-	t.end();
 });
