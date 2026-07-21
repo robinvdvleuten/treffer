@@ -19,7 +19,6 @@ let scalarCount = (s, max, invalid) => {
 		} else if (a >= 0xdc00 && a <= 0xdfff) invalid();
 		++count <= max || cap();
 	}
-	return count;
 };
 
 let parse = (src, anchors) => {
@@ -27,7 +26,6 @@ let parse = (src, anchors) => {
 	scalarCount(src, MAX, bad);
 	const s = Array.from(src);
 	let i = 0, depth = 0;
-	const lit = c => ({ t: 'c', p: x => x === c });
 	const prop = (neg, p) => {
 		PROP.test(p) || bad();
 		const r = new RegExp('^\\' + (neg ? 'P' : 'p') + '{' + p + '}$', 'u');
@@ -47,7 +45,7 @@ let parse = (src, anchors) => {
 		return { p: x => x === v, c: v };
 	};
 	const cls = () => {
-		let neg = s[i] === '^', ps = [], any = false;
+		let neg = s[i] === '^', ps = [];
 		if (neg) i++;
 		const one = () => {
 			const c = s[i++];
@@ -55,10 +53,10 @@ let parse = (src, anchors) => {
 			(c != null && c !== '[' && c !== ']' && c !== '-') || bad();
 			return { p: x => x === c, c };
 		};
-		if (s[i] === '-') { ps.push(x => x === '-'); i++; any = true }
+		if (s[i] === '-') { ps.push(x => x === '-'); i++ }
 		while (i < s.length && s[i] !== ']') {
 			if (s[i] === '-' && s[i + 1] === ']') {
-				ps.push(x => x === '-'); i++; any = true; continue;
+				ps.push(x => x === '-'); i++; continue;
 			}
 			const a = one();
 			if (s[i] === '-' && s[i + 1] !== ']') {
@@ -68,9 +66,8 @@ let parse = (src, anchors) => {
 				const lo = a.c.codePointAt(), hi = b.c.codePointAt();
 				ps.push(x => { const n = x.codePointAt(); return n >= lo && n <= hi });
 			} else ps.push(a.p);
-			any = true;
 		}
-		(any && s[i++] === ']') || bad();
+		(ps.length && s[i++] === ']') || bad();
 		return { t: 'c', p: (c, spend) => {
 			let yes = false;
 			for (const p of ps) {
@@ -105,7 +102,7 @@ let parse = (src, anchors) => {
 		if (c === '.') return { t: 'c', p: x => x !== '\n' && x !== '\r' };
 		if (anchors && (c === '^' || c === '$')) return { t: 'z', a: c === '$' };
 		(c != null && !'()[]|*+?{}'.includes(c)) || bad();
-		return lit(c);
+		return { t: 'c', p: x => x === c };
 	};
 	const piece = () => {
 		const a = atom(), c = s[i];
