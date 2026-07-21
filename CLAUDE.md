@@ -7,6 +7,7 @@ Tiny, bounded RFC 9485 I-Regexp matcher for JavaScript. Zero runtime dependencie
 - `npm test` runs the Node test runner under `node --disallow-code-generation-from-strings`.
 - `npm run build` creates minified ESM and CJS bundles in `dist/`.
 - `npm run size` checks both bundles against the budgets in `package.json`.
+- `npm run bench` runs zero-dependency compile, match, search, and scaling benchmarks against `src/`.
 - `npm run fuzz` runs compile, match, and structured fuzz targets for 60 seconds each.
 - `npm run fuzz:regression` replays the committed corpus.
 
