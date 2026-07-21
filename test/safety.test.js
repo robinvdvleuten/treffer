@@ -11,7 +11,7 @@ test('source contains no string-to-code constructs', () => {
 });
 
 test('adversarial regular expressions stay bounded', () => {
-	const n = 30_000, text = 'a'.repeat(n) + '!';
+	const n = 50_000, text = 'a'.repeat(n) + '!';
 	const t0 = Date.now();
 
 	assert.throws(() => compile('(a+)+$', { anchors: true }).search(text), RangeError, 'nested repetition hits work cap');

@@ -151,7 +151,11 @@ let build = (pattern, anchors) => {
 		if (!n[0]) return empty();
 		if (n[0] === 1) { const j = add(1, -1, -1, n[1]); return { s: j, o: [[j, 1]] } }
 		if (n[0] === 2) { const j = add(2, -1, -1, n[1]); return { s: j, o: [[j, 1]] } }
-		if (n[0] === 3) return n[1].reduce((a, x) => cat(a, visit(x)), empty());
+		if (n[0] === 3) {
+			let a = visit(n[1][0]);
+			for (let k = 1; k < n[1].length; k++) a = cat(a, visit(n[1][k]));
+			return a;
+		}
 		if (n[0] === 4) {
 			let a = visit(n[1][0]);
 			for (let k = 1; k < n[1].length; k++) {
@@ -160,8 +164,8 @@ let build = (pattern, anchors) => {
 			}
 			return a;
 		}
-		let a = empty();
-		for (let k = 0; k < n[2]; k++) a = cat(a, visit(n[1]));
+		let a = n[2] ? visit(n[1]) : empty();
+		for (let k = 1; k < n[2]; k++) a = cat(a, visit(n[1]));
 		if (n[3] < 0) {
 			const b = visit(n[1]), j = add(0, b.s);
 			patch(a.o, j); patch(b.o, j);

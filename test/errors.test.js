@@ -42,8 +42,8 @@ test('compile-time resource limits throw RangeError', () => {
 	assert.throws(() => compile('a{1025}'), RangeError, 'repetition count');
 	assert.throws(() => compile('a{0001024}'), RangeError, 'quantifier digits');
 
-	assert.doesNotThrow(() => compile('a'.repeat(4094)), 'largest NFA');
-	assert.throws(() => compile('a'.repeat(4095)), RangeError, 'NFA state count');
+	assert.doesNotThrow(() => compile('a'.repeat(4095)), 'largest NFA');
+	assert.throws(() => compile('a'.repeat(4096)), RangeError, 'NFA state count');
 	assert.doesNotThrow(() => compile('[' + 'a'.repeat(4094) + ']'), 'largest pattern');
 	assert.throws(() => compile('[' + 'a'.repeat(4095) + ']'), RangeError, 'pattern scalar count');
 });
