@@ -103,6 +103,10 @@ Runtime is bounded by the subject length times the number of active NFA states. 
 
 Treffer parses patterns into data structures and closures. It generates no JavaScript source and works under a strict Content Security Policy.
 
+## Environments
+
+Node.js 22 and newer are supported through the ESM and CommonJS builds. Browser use is supported through a standards-based ESM bundler in environments supporting ES2024. Direct `<script>` globals and UMD builds are not provided.
+
 ## License
 
 MIT © [Robin van der Vleuten](https://robinvdvleuten.nl)

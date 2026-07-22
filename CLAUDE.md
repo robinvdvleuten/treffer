@@ -5,7 +5,7 @@ Tiny, bounded RFC 9485 I-Regexp matcher for JavaScript. Zero runtime dependencie
 ## Commands
 
 - `npm test` runs the Node test runner under `node --disallow-code-generation-from-strings`.
-- `npm run build` creates minified ESM and CJS bundles in `dist/`.
+- `npm run build` creates minified ESM and CJS bundles targeting ES2024 in `dist/`.
 - `npm run size` checks both bundles against the budgets in `package.json`.
 - `npm run bench` runs zero-dependency compile, match, search, and scaling benchmarks against `src/`.
 - `npm run fuzz` runs compile, match, and structured fuzz targets for 60 seconds each.
@@ -48,5 +48,7 @@ Syntax errors throw `SyntaxError`, invalid API values throw `TypeError`, and res
 - Tests use the Node test runner and live in `test/*.test.js`.
 - New syntax or safety behavior needs unit tests and structured fuzz coverage.
 - Keep the fuzz differential oracle restricted to short patterns and subjects so the native comparison engine cannot become a fuzzing bottleneck.
+- Runtime support is Node.js 22+ through ESM/CJS and ES2024 browser environments through a standards-based ESM bundler. There is no direct-script global or UMD build.
+- Suggested commit messages must follow Conventional Commits and be at most 80 characters.
 - `index.d.ts` is hand-written. Type generation stays disabled in `tsdown.config.js`.
 - `dist/`, `.fuzz-corpus/`, and generated fuzz artifacts are not committed.
