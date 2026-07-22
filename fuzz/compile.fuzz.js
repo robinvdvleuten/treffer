@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { compile } from '../src/index.js';
+import { compile, isDiagnostic } from '../src/index.js';
 
 export function fuzz(data) {
 	const pattern = data.toString();
@@ -8,5 +8,7 @@ export function fuzz(data) {
 		assert.ok(Object.isFrozen(re));
 	} catch (err) {
 		assert.ok(err instanceof SyntaxError || err instanceof RangeError);
+		assert.ok(isDiagnostic(err));
+		assert.match(err.code, /^TREFFER_(?:SYNTAX|MAX_[A-Z_]+)$/);
 	}
 }

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { FuzzedDataProvider } from '@jazzer.js/core';
-import { compile } from '../src/index.js';
+import { compile, isDiagnostic } from '../src/index.js';
 
 const ATOM = ['a', 'b', '.', '[a-z]', '[^b]', '[-a]', '\\p{L}', '\\P{N}', '😀'];
 const pick = (data, values) => values[data.consumeIntegralInRange(0, values.length - 1)];
@@ -35,6 +35,14 @@ let native = (p, full) => {
 assert.equal(compile('(a+)+').match('a'.repeat(1000)), true);
 assert.equal(compile('(a+)+$', { anchors: true }).search('a'.repeat(1000) + '!'), false);
 assert.equal(compile('(a*)*').match('a'.repeat(1000)), true);
+for (const [p, code] of [
+	['(', 'TREFFER_SYNTAX'],
+	['('.repeat(65) + 'a' + ')'.repeat(65), 'TREFFER_MAX_GROUP_DEPTH'],
+	['a{0001024}', 'TREFFER_MAX_QUANTIFIER_DIGITS'],
+	['a{1025}', 'TREFFER_MAX_REPETITIONS'],
+	['a'.repeat(4096), 'TREFFER_MAX_NFA_STATES'],
+	['[' + 'a'.repeat(4095) + ']', 'TREFFER_MAX_PATTERN_SCALARS'],
+]) assert.throws(() => compile(p), e => isDiagnostic(e) && e.code === code);
 
 export function fuzz(input) {
 	const data = new FuzzedDataProvider(input);

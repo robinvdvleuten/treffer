@@ -5,11 +5,20 @@
 const PROP = /^(?:L[lmotu]?|M[cen]?|N[dlo]?|P[cdefios]?|Z[lps]?|S[ckmo]?|C[cfno]?)$/;
 const MAX = 4096, DEPTH = 64, REPEAT = 1024, STEPS = 1e6;
 
-let bad = () => { throw SyntaxError('Invalid I-Regexp') };
-let cap = () => { throw RangeError('I-Regexp resource limit exceeded') };
+let diags = new WeakSet(), mark = diags.add.bind(diags);
+export let isDiagnostic = diags.has.bind(diags);
+let fault = (Type, msg, code, limit, actual) => {
+	const e = Type(msg);
+	if (code) e.code = code;
+	if (limit != null) e.limit = limit;
+	if (actual != null) e.actual = actual;
+	return mark(e), e;
+};
+let bad = () => { throw fault(SyntaxError, 'Invalid I-Regexp', 'TREFFER_SYNTAX') };
+let cap = (code, limit, actual) => { throw fault(RangeError, 'I-Regexp resource limit exceeded', code, limit, actual) };
 
 // Count Unicode scalar values without allocating, rejecting lone surrogates.
-let scalarCount = (s, max, invalid) => {
+let scalarCount = (s, max, invalid, code) => {
 	let count = 0;
 	for (let j = 0; j < s.length; j++) {
 		const a = s.charCodeAt(j);
@@ -17,13 +26,13 @@ let scalarCount = (s, max, invalid) => {
 			const b = s.charCodeAt(++j);
 			(b >= 0xdc00 && b <= 0xdfff) || invalid();
 		} else if (a >= 0xdc00 && a <= 0xdfff) invalid();
-		++count <= max || cap();
+		++count <= max || cap(code, max, count);
 	}
 };
 
 let parse = (src, anchors) => {
-	src.length <= MAX * 2 || cap();
-	scalarCount(src, MAX, bad);
+	src.length <= MAX * 2 || cap('TREFFER_MAX_PATTERN_SCALARS', MAX);
+	scalarCount(src, MAX, bad, 'TREFFER_MAX_PATTERN_SCALARS');
 	const s = Array.from(src);
 	let i = 0, depth = 0;
 	const prop = (neg, p) => {
@@ -80,9 +89,9 @@ let parse = (src, anchors) => {
 	const number = () => {
 		let n = 0, d = 0;
 		while (i < s.length && s[i] >= '0' && s[i] <= '9') {
-			++d <= 6 || cap();
+			++d <= 6 || cap('TREFFER_MAX_QUANTIFIER_DIGITS', 6, d);
 			n = n * 10 + +s[i++];
-			n <= REPEAT || cap();
+			n <= REPEAT || cap('TREFFER_MAX_REPETITIONS', REPEAT, n);
 		}
 		d || bad();
 		return n;
@@ -91,7 +100,7 @@ let parse = (src, anchors) => {
 	const atom = () => {
 		const c = s[i++];
 		if (c === '(') {
-			++depth <= DEPTH || cap();
+			++depth <= DEPTH || cap('TREFFER_MAX_GROUP_DEPTH', DEPTH, depth);
 			const n = alt();
 			s[i++] === ')' || bad();
 			depth--;
@@ -141,7 +150,7 @@ let parse = (src, anchors) => {
 let build = (pattern, anchors) => {
 	const ast = parse(pattern, anchors), st = [];
 	const add = (t, x = -1, y = -1, v) => {
-		st.length < MAX || cap();
+		st.length < MAX || cap('TREFFER_MAX_NFA_STATES', MAX, st.length + 1);
 		return st.push([t, x, y, v]) - 1;
 	};
 	const patch = (o, x) => o.forEach(([j, k]) => { st[j][k] = x });
@@ -184,11 +193,11 @@ let build = (pattern, anchors) => {
 };
 
 let run = (nfa, str, full) => {
-	typeof str === 'string' || (() => { throw TypeError('Subject must be a string') })();
-	scalarCount(str, STEPS, () => { throw TypeError('Subject must contain Unicode scalar values') });
+	typeof str === 'string' || (() => { throw fault(TypeError, 'Subject must be a string') })();
+	scalarCount(str, STEPS, () => { throw fault(TypeError, 'Subject must contain Unicode scalar values') }, 'TREFFER_MAX_SUBJECT_SCALARS');
 	const { st, start, end } = nfa, len = str.length;
 	let cur = new Set(), steps = 0;
-	const spend = () => { ++steps <= STEPS || cap() };
+	const spend = () => { ++steps <= STEPS || cap('TREFFER_MAX_TRANSITIONS', STEPS, steps) };
 	const add = (set, root, pos) => {
 		const todo = [root], seen = new Set();
 		while (todo.length) {
@@ -221,10 +230,10 @@ let run = (nfa, str, full) => {
 };
 
 export let compile = (pattern, options) => {
-	typeof pattern === 'string' || (() => { throw TypeError('Pattern must be a string') })();
-	if (options != null && typeof options !== 'object') throw TypeError('Options must be an object');
+	typeof pattern === 'string' || (() => { throw fault(TypeError, 'Pattern must be a string') })();
+	if (options != null && typeof options !== 'object') throw fault(TypeError, 'Options must be an object');
 	const anchors = options?.anchors ?? false;
-	typeof anchors === 'boolean' || (() => { throw TypeError('anchors must be a boolean') })();
+	typeof anchors === 'boolean' || (() => { throw fault(TypeError, 'anchors must be a boolean') })();
 	const nfa = build(pattern, anchors);
 	return Object.freeze({
 		match: subject => run(nfa, subject, true),

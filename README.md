@@ -75,7 +75,17 @@ line.search('x item-42'); // false
 
 ## Errors and limits
 
-`compile()` throws `SyntaxError` for invalid I-Regexp syntax. Type mistakes throw `TypeError`. Resource limits throw `RangeError`.
+Errors produced by Treffer keep their `SyntaxError`, `TypeError`, or `RangeError` class. Syntax and resource errors expose machine-readable properties:
+
+- `code`: a stable category;
+- `limit`: the fixed resource limit, for resource errors;
+- `actual`: the observed value, when it can be determined without weakening early rejection.
+
+The codes are `TREFFER_SYNTAX`, `TREFFER_MAX_PATTERN_SCALARS`, `TREFFER_MAX_GROUP_DEPTH`, `TREFFER_MAX_QUANTIFIER_DIGITS`, `TREFFER_MAX_REPETITIONS`, `TREFFER_MAX_NFA_STATES`, `TREFFER_MAX_SUBJECT_SCALARS`, and `TREFFER_MAX_TRANSITIONS`. API `TypeError`s have no code.
+
+Errors thrown by caller-provided option accessors are host errors. Treffer passes them through unchanged and does not attach diagnostic fields.
+
+Use `isDiagnostic(error)` when a host needs to distinguish those errors. It returns `true` only for errors created by the same Treffer module instance. Copying documented `code`, `limit`, and `actual` properties onto another error does not authenticate it. A diagnostic from another installed copy or module instance also returns `false`.
 
 The fixed safety limits are:
 

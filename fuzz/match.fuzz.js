@@ -1,9 +1,12 @@
 import assert from 'node:assert/strict';
-import { compile } from '../src/index.js';
+import { compile, isDiagnostic } from '../src/index.js';
 
 let outcome = fn => {
 	try { return ['value', fn()] }
-	catch (err) { return ['error', err.constructor.name] }
+	catch (err) {
+		assert.ok(isDiagnostic(err));
+		return ['error', err.constructor.name, err.code, err.limit, err.actual];
+	}
 };
 
 export function fuzz(data) {
@@ -20,5 +23,6 @@ export function fuzz(data) {
 		}
 	} catch (err) {
 		assert.ok(err instanceof SyntaxError || err instanceof RangeError);
+		assert.ok(isDiagnostic(err));
 	}
 }
