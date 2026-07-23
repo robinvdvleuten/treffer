@@ -4,6 +4,7 @@ Tiny, bounded RFC 9485 I-Regexp matcher for JavaScript. Zero runtime dependencie
 
 ## Commands
 
+- `npm run check` — reproduces the complete pull-request quality gate locally: build, bundle size, unit tests, deterministic fuzz regression, and browser CSP coverage.
 - `npm test` — runs `test:unit`: Node's built-in test runner under `--disallow-code-generation-from-strings` (strict-CSP simulation). Keep this on Node: Bun accepts that V8 flag but does not enforce it. Treffer has no separate type smoke test.
 - `npm run build` — creates minified ESM and CJS bundles targeting ES2024 in `dist/`.
 - `npm run size` — checks both bundles against the budgets in `package.json`.
