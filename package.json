@@ -2,7 +2,7 @@
 	"name": "treffer",
 	"version": "0.2.0",
 	"description": "Tiny, bounded RFC 9485 I-Regexp matcher backed by a Thompson NFA.",
-	"repository": "robinvdvleuten/treffer",
+	"repository": "getquario/treffer",
 	"license": "MIT",
 	"author": {
 		"name": "Robin van der Vleuten",

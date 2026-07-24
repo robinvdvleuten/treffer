@@ -3,9 +3,9 @@
 A tiny, bounded [RFC 9485 I-Regexp](https://www.rfc-editor.org/rfc/rfc9485.html) matcher for JavaScript. **~2KB min+gzip, zero runtime dependencies.**
 
 [![NPM version](https://img.shields.io/npm/v/treffer.svg)](https://www.npmjs.com/package/treffer)
-[![Build Status](https://github.com/robinvdvleuten/treffer/actions/workflows/test.yml/badge.svg)](https://github.com/robinvdvleuten/treffer/actions/workflows/test.yml)
+[![Build Status](https://github.com/getquario/treffer/actions/workflows/test.yml/badge.svg)](https://github.com/getquario/treffer/actions/workflows/test.yml)
 [![NPM downloads](https://img.shields.io/npm/dm/treffer.svg)](https://www.npmjs.com/package/treffer)
-[![MIT license](https://img.shields.io/github/license/robinvdvleuten/treffer.svg)](https://github.com/robinvdvleuten/treffer/blob/main/LICENSE)
+[![MIT license](https://img.shields.io/github/license/getquario/treffer.svg)](https://github.com/getquario/treffer/blob/main/LICENSE)
 
 <a href="https://webstronauts.com?utm_source=github&utm_medium=readme&utm_campaign=treffer">
 	<picture>
